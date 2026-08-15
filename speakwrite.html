@@ -413,6 +413,7 @@
       <div class="settings-panel" id="settingsPanel">
         <label class="chk"><input type="checkbox" id="autostartToggle" checked> Écoute automatique</label>
         <label class="chk"><input type="checkbox" id="punctToggle" checked> Ponctuation vocale</label>
+        <label class="chk"><input type="checkbox" id="techDictToggle" checked> Corrections techniques auto</label>
         <label class="settings-label">Langue
           <select id="lang">
             <option value="fr-FR" selected>Français</option>
@@ -472,7 +473,8 @@
 
 <div id="unsupported">
   Votre navigateur ne supporte pas la reconnaissance vocale (Web Speech API).<br><br>
-  Ouvrez cette page avec <b>Google Chrome</b> ou <b>Microsoft Edge</b> pour utiliser SpeakWritter.
+  Ouvrez cette page avec un navigateur basé sur Chromium — <b>Google Chrome</b>, <b>Microsoft Edge</b>, <b>Brave</b>, <b>Vivaldi</b> ou <b>Opera</b> — pour utiliser SpeakWritter.<br><br>
+  <span style="font-size:12px;opacity:.75">Firefox et Safari n'implémentent pas encore cette API du navigateur ; ce n'est pas réglable côté application.</span>
 </div>
 
 <script>
@@ -483,6 +485,7 @@
   const status = document.getElementById('status');
   const langSel = document.getElementById('lang');
   const punctToggle = document.getElementById('punctToggle');
+  const techDictToggle = document.getElementById('techDictToggle');
   const copyBtn = document.getElementById('copyBtn');
   const saveBtn = document.getElementById('saveBtn');
   const clearBtn = document.getElementById('clearBtn');
@@ -593,9 +596,9 @@
     return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
-  function applyPersonalDictionary(text){
-    if(personalDictionary.length === 0) return text;
-    const sorted = [...personalDictionary].sort((a,b) => b.from.length - a.from.length);
+  function applyDictionaryList(entries, text){
+    if(entries.length === 0) return text;
+    const sorted = [...entries].sort((a,b) => b.from.length - a.from.length);
     for(const entry of sorted){
       if(!entry.from) continue;
       const pattern = new RegExp('\\b' + escapeRegExp(entry.from) + '\\b', 'gi');
@@ -604,7 +607,60 @@
     return text;
   }
 
+  function applyPersonalDictionary(text){
+    return applyDictionaryList(personalDictionary, text);
+  }
+
   renderDictionary();
+
+  // --- Built-in tech/Franglais dictionary ---
+  // Ships with the app (generic, not personal data) and fixes the casing
+  // of common French-dictated dev & tech terms -- e.g. "github" -> "GitHub".
+  // Runs before the personal dictionary, so personal entries can still
+  // override any of these if needed.
+  const TECH_DICTIONARY_KEY = 'speakwrite_tech_dict';
+  techDictToggle.checked = localStorage.getItem(TECH_DICTIONARY_KEY) !== 'false';
+  techDictToggle.addEventListener('change', () => {
+    localStorage.setItem(TECH_DICTIONARY_KEY, techDictToggle.checked ? 'true' : 'false');
+  });
+
+  const BUILT_IN_DICTIONARY = [
+    { from:"git", to:"Git" },
+    { from:"github", to:"GitHub" },
+    { from:"gitlab", to:"GitLab" },
+    { from:"javascript", to:"JavaScript" },
+    { from:"typescript", to:"TypeScript" },
+    { from:"python", to:"Python" },
+    { from:"powershell", to:"PowerShell" },
+    { from:"html", to:"HTML" },
+    { from:"css", to:"CSS" },
+    { from:"json", to:"JSON" },
+    { from:"api", to:"API" },
+    { from:"url", to:"URL" },
+    { from:"http", to:"HTTP" },
+    { from:"https", to:"HTTPS" },
+    { from:"sql", to:"SQL" },
+    { from:"wifi", to:"Wi-Fi" },
+    { from:"linux", to:"Linux" },
+    { from:"windows", to:"Windows" },
+    { from:"macos", to:"macOS" },
+    { from:"ios", to:"iOS" },
+    { from:"android", to:"Android" },
+    { from:"docker", to:"Docker" },
+    { from:"kubernetes", to:"Kubernetes" },
+    { from:"react", to:"React" },
+    { from:"node", to:"Node.js" },
+    { from:"php", to:"PHP" },
+    { from:"chatgpt", to:"ChatGPT" },
+    { from:"openai", to:"OpenAI" },
+    { from:"claude", to:"Claude" },
+    { from:"anthropic", to:"Anthropic" },
+  ];
+
+  function applyTechDictionary(text){
+    if(!techDictToggle.checked) return text;
+    return applyDictionaryList(BUILT_IN_DICTIONARY, text);
+  }
 
   // --- Auto-start listening on launch ---
   const AUTOSTART_KEY = 'speakwrite_autostart';
@@ -657,6 +713,7 @@
   let capitalizeNext = true;
 
   function processTranscript(rawTranscript, punctuationOn){
+    rawTranscript = applyTechDictionary(rawTranscript);
     rawTranscript = applyPersonalDictionary(rawTranscript);
     const words = rawTranscript.trim().split(/\s+/).filter(Boolean);
     if(words.length === 0) return '';
