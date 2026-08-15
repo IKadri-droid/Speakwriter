@@ -441,7 +441,7 @@
     --placeholder-color:#b0c0cd;
   }
 
-  #unsupported{
+  #unsupported, #micBlocked{
     display:none;
     position:fixed;inset:0;
     background:rgba(0,0,0,.85);
@@ -453,6 +453,25 @@
     line-height:1.6;
     z-index:10;
   }
+  #micBlocked .box{
+    max-width:420px;
+  }
+  #micBlocked code{
+    background:rgba(255,255,255,.12);
+    padding:2px 6px;
+    border-radius:4px;
+    font-size:13px;
+  }
+  #micBlocked .btn{
+    margin-top:18px;
+    background:var(--accent2);
+    color:#0c1c14;
+    border:none;
+    padding:9px 18px;
+    font-size:13px;
+    font-weight:600;
+  }
+  #micBlocked .btn:hover{background:#4de0a0;}
 </style>
 </head>
 <body>
@@ -532,6 +551,19 @@
   Votre navigateur ne supporte pas la reconnaissance vocale (Web Speech API).<br><br>
   Ouvrez cette page avec un navigateur basé sur Chromium — <b>Google Chrome</b>, <b>Microsoft Edge</b>, <b>Brave</b>, <b>Vivaldi</b> ou <b>Opera</b> — pour utiliser SpeakWritter.<br><br>
   <span style="font-size:12px;opacity:.75">Firefox et Safari n'implémentent pas encore cette API du navigateur ; ce n'est pas réglable côté application.</span>
+</div>
+
+<div id="micBlocked">
+  <div class="box">
+    <b>Micro bloqué pour SpeakWritter</b><br><br>
+    Chrome/Edge a refusé (ou n'a jamais reçu) l'autorisation micro pour cette page. Cette fenêtre n'a pas de barre d'adresse pour le corriger directement, donc :<br><br>
+    1. Ouvre un onglet normal dans ton navigateur<br>
+    2. Colle cette adresse : <code>chrome://settings/content/microphone</code><br>
+    3. Trouve <code>127.0.0.1:8743</code> dans la liste et passe-le sur <b>Autoriser</b><br>
+    4. Reviens ici et clique sur "Réessayer"
+    <br>
+    <button class="btn" id="micBlockedRetry">Réessayer</button>
+  </div>
 </div>
 
 <script>
@@ -733,6 +765,38 @@
     return;
   }
 
+  // --- Mic permission blocked screen ---
+  // The app runs in --app mode (no address bar), so if the mic permission
+  // ends up denied there's no visible way for the user to fix it from
+  // inside the window. This makes the problem visible with exact steps.
+  const micBlocked = document.getElementById('micBlocked');
+  const micBlockedRetry = document.getElementById('micBlockedRetry');
+  function showMicBlocked(){
+    micBlocked.style.display = 'flex';
+  }
+  function hideMicBlocked(){
+    micBlocked.style.display = 'none';
+  }
+  micBlockedRetry.addEventListener('click', () => {
+    hideMicBlocked();
+    startListening();
+  });
+
+  if(navigator.permissions && navigator.permissions.query){
+    navigator.permissions.query({ name: 'microphone' }).then((status) => {
+      if(status.state === 'denied'){
+        showMicBlocked();
+      }
+      status.onchange = () => {
+        if(status.state === 'denied'){
+          showMicBlocked();
+        } else if(status.state === 'granted'){
+          hideMicBlocked();
+        }
+      };
+    }).catch(() => {});
+  }
+
   // --- Voice punctuation commands (French) ---
   const commands = [
     { words:["points","de","suspension"], symbol:"…" },
@@ -865,6 +929,7 @@
         userStopped = true;
         listening = false;
         micBtn.classList.remove('listening');
+        showMicBlocked();
       }
     };
 
