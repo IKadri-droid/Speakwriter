@@ -13,6 +13,7 @@ Aucun serveur, aucun compte, aucune donnée envoyée ailleurs que vers le moteur
 - **Fenêtre native** — lancée via Chrome/Edge en mode `--app`, sans barre d'adresse ni onglets, comme une vraie application de bureau.
 - **Sauvegarde automatique** — le texte est conservé entre les sessions (stockage local du navigateur).
 - **Export** — copier dans le presse-papiers ou enregistrer en `.txt` en un clic.
+- **Dictionnaire personnel** — apprenez à SpeakWritter vos propres corrections (ex: mélange français/anglais comme "commit", "push", "repository"). Stocké uniquement dans le navigateur local, jamais dans ce dépôt.
 
 ## Installation
 
@@ -41,6 +42,12 @@ Pour un raccourci sur le bureau avec l'icône de l'application :
 ### Commandes de ponctuation vocale
 
 `virgule` · `point` · `point d'interrogation` · `point d'exclamation` · `deux points` · `point virgule` · `points de suspension` · `à la ligne` · `nouveau paragraphe` · `ouvrez/fermez parenthèse` · `guillemets ouvrants/fermants` · `tiret`
+
+## Dictionnaire personnel
+
+Dans le menu ⚙️ → Dictionnaire personnel, ajoutez des paires "mot entendu → mot corrigé". À chaque dictée, SpeakWritter remplace automatiquement ces mots avant de les écrire. Utile pour les mélanges français/anglais récurrents (ex: `pouche` → `push`, `reposte` → `repository`).
+
+Ces corrections sont **100% locales** : stockées dans le `localStorage` de votre navigateur, elles ne quittent jamais votre machine et ne font partie d'aucun fichier de ce dépôt.
 
 ## Autorisation du micro
 

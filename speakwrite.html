@@ -125,7 +125,7 @@
     display:none;
     flex-direction:column;
     gap:12px;
-    min-width:210px;
+    min-width:230px;
     box-shadow:0 12px 32px rgba(0,0,0,.35);
     z-index:20;
   }
@@ -139,6 +139,73 @@
     color:var(--muted);
   }
   .settings-label select{width:100%;}
+  .dict-box{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .dict-list{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    max-height:120px;
+    overflow-y:auto;
+  }
+  .dict-empty{
+    font-size:11px;
+    color:var(--muted);
+    font-style:italic;
+  }
+  .dict-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:6px;
+    background:var(--btn-bg);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:4px 8px;
+    font-size:12px;
+    color:var(--header-text);
+  }
+  .dict-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .dict-del{
+    background:none;
+    border:none;
+    color:var(--muted);
+    cursor:pointer;
+    font-size:14px;
+    line-height:1;
+    padding:0 2px;
+    flex-shrink:0;
+  }
+  .dict-del:hover{color:var(--accent);}
+  .dict-add{
+    display:flex;
+    gap:6px;
+  }
+  .dict-add input{
+    flex:1;
+    min-width:0;
+    background:var(--btn-bg);
+    color:var(--header-text);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:5px 7px;
+    font-size:12px;
+  }
+  .dict-add button{
+    flex-shrink:0;
+    width:26px;height:26px;
+    border-radius:6px;
+    border:1px solid var(--border);
+    background:var(--btn-bg);
+    color:var(--header-text);
+    cursor:pointer;
+    font-size:15px;
+    line-height:1;
+  }
+  .dict-add button:hover{background:var(--btn-bg-hover);}
 
   main{
     flex:1;
@@ -362,6 +429,17 @@
             <option value="suisse">Suisse</option>
           </select>
         </label>
+        <div class="settings-label">
+          <span>Dictionnaire personnel</span>
+          <div class="dict-box">
+            <div class="dict-list" id="dictList"></div>
+            <div class="dict-add">
+              <input type="text" id="dictFrom" placeholder="mot entendu">
+              <input type="text" id="dictTo" placeholder="mot corrigé">
+              <button id="dictAddBtn" title="Ajouter">+</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <span class="toolbar-divider"></span>
@@ -443,6 +521,91 @@
     }
   });
 
+  // --- Personal correction dictionary ---
+  // Fully local: stored in this browser's localStorage only, never written
+  // to a file, so it's never part of the git repository or pushed anywhere.
+  // Lets each user teach SpeakWritter their own mix of French + English
+  // words (e.g. dev jargon like "commit", "push", "repository") that the
+  // speech engine tends to mishear.
+  const DICT_KEY = 'speakwrite_dictionary';
+  const dictList = document.getElementById('dictList');
+  const dictFrom = document.getElementById('dictFrom');
+  const dictTo = document.getElementById('dictTo');
+  const dictAddBtn = document.getElementById('dictAddBtn');
+
+  let personalDictionary = [];
+  try{
+    personalDictionary = JSON.parse(localStorage.getItem(DICT_KEY) || '[]');
+  }catch(err){
+    personalDictionary = [];
+  }
+
+  function saveDictionary(){
+    localStorage.setItem(DICT_KEY, JSON.stringify(personalDictionary));
+  }
+
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+  }
+
+  function renderDictionary(){
+    dictList.innerHTML = '';
+    if(personalDictionary.length === 0){
+      dictList.innerHTML = '<div class="dict-empty">Aucune correction pour l’instant</div>';
+      return;
+    }
+    personalDictionary.forEach((entry, idx) => {
+      const row = document.createElement('div');
+      row.className = 'dict-row';
+      row.innerHTML = `<span>${escapeHtml(entry.from)} → ${escapeHtml(entry.to)}</span>`;
+      const del = document.createElement('button');
+      del.className = 'dict-del';
+      del.textContent = '×';
+      del.title = 'Supprimer';
+      del.addEventListener('click', () => {
+        personalDictionary.splice(idx, 1);
+        saveDictionary();
+        renderDictionary();
+      });
+      row.appendChild(del);
+      dictList.appendChild(row);
+    });
+  }
+
+  function addDictionaryEntry(){
+    const from = dictFrom.value.trim();
+    const to = dictTo.value.trim();
+    if(!from || !to) return;
+    personalDictionary.push({ from, to });
+    saveDictionary();
+    renderDictionary();
+    dictFrom.value = '';
+    dictTo.value = '';
+    dictFrom.focus();
+  }
+
+  dictAddBtn.addEventListener('click', addDictionaryEntry);
+  dictTo.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter'){ e.preventDefault(); addDictionaryEntry(); }
+  });
+
+  function escapeRegExp(s){
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function applyPersonalDictionary(text){
+    if(personalDictionary.length === 0) return text;
+    const sorted = [...personalDictionary].sort((a,b) => b.from.length - a.from.length);
+    for(const entry of sorted){
+      if(!entry.from) continue;
+      const pattern = new RegExp('\\b' + escapeRegExp(entry.from) + '\\b', 'gi');
+      text = text.replace(pattern, entry.to);
+    }
+    return text;
+  }
+
+  renderDictionary();
+
   // --- Auto-start listening on launch ---
   const AUTOSTART_KEY = 'speakwrite_autostart';
   autostartToggle.checked = localStorage.getItem(AUTOSTART_KEY) !== 'false';
@@ -494,6 +657,7 @@
   let capitalizeNext = true;
 
   function processTranscript(rawTranscript, punctuationOn){
+    rawTranscript = applyPersonalDictionary(rawTranscript);
     const words = rawTranscript.trim().split(/\s+/).filter(Boolean);
     if(words.length === 0) return '';
 
