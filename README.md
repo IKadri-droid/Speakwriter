@@ -1,92 +1,94 @@
 # SpeakWritter
 
-SpeakWritter est un bloc-notes de dictée vocale qui tourne **entièrement en local** dans votre navigateur. Cliquez sur le micro, parlez : le texte s'écrit en temps réel, avec ponctuation vocale et plusieurs thèmes.
+SpeakWritter is a voice-dictation notepad that runs **entirely locally** in your browser. Click the mic, talk: the text is written in real time, with voice punctuation and multiple themes.
 
-Aucun compte, aucune donnée envoyée ailleurs que vers le moteur de reconnaissance vocale intégré à votre navigateur. Un petit serveur local (voir [Technique](#technique)) sert juste le fichier de l'app depuis votre machine — rien ne sort de votre ordinateur.
+No account, no data sent anywhere other than your browser's built-in speech recognition engine. A small local server (see [Technical details](#technical-details)) just serves the app file from your own machine — nothing leaves your computer.
 
-## Compatibilité navigateur
+## Browser compatibility
 
-SpeakWritter fonctionne sur **tout navigateur basé sur Chromium** : Google Chrome, Microsoft Edge, Brave, Vivaldi, Opera... Le lanceur essaie ces navigateurs automatiquement dans cet ordre.
+SpeakWritter works on **any Chromium-based browser**: Google Chrome, Microsoft Edge, Brave, Vivaldi, Opera... The launcher tries these browsers automatically, in that order.
 
-**Firefox et Safari ne sont pas supportés** — ce n'est pas une limitation de l'application : ces navigateurs n'implémentent pas la partie reconnaissance continue (`SpeechRecognition`) de la Web Speech API. Aucune modification côté application ne peut contourner ça tant que ces navigateurs n'ajoutent pas cette fonctionnalité.
+**Firefox and Safari are not supported** — this isn't a limitation of the app: these browsers don't implement the continuous-recognition part (`SpeechRecognition`) of the Web Speech API. No change on the app side can work around that until these browsers add the feature.
 
-## Fonctionnalités
+## Features
 
-- **Dictée en temps réel** — le texte apparaît au fur et à mesure que vous parlez (résultats intermédiaires affichés en italique sous le bloc-notes).
-- **Ponctuation vocale** — dites "virgule", "point", "à la ligne", "nouveau paragraphe", "point d'interrogation", "deux points", "ouvrez parenthèse"... et SpeakWritter insère le bon symbole, avec la bonne casse et le bon espacement.
-- **Démarrage automatique** — l'écoute démarre toute seule à l'ouverture de l'application (activable/désactivable dans les réglages).
-- **9 thèmes complets** — chaque thème change toute l'interface (pas seulement le fond) : Clair, Sombre, Bois foncé, Bois clair, Sakura, Matte, Suisse, Jauni, Bleu.
-- **Fenêtre native** — lancée en mode `--app` (Chrome, Edge, Brave, Vivaldi ou Opera), sans barre d'adresse ni onglets, comme une vraie application de bureau.
-- **Sauvegarde automatique** — le texte est conservé entre les sessions (stockage local du navigateur).
-- **Export** — copier dans le presse-papiers ou enregistrer en `.txt` en un clic.
-- **Dictionnaire technique intégré** — corrige automatiquement la casse des termes techniques courants dictés en franglais (ex: "github" → "GitHub", "javascript" → "JavaScript"). Désactivable dans les réglages.
-- **Dictionnaire personnel** — apprenez à SpeakWritter vos propres corrections en plus (ex: "pouche" → "push"). Stocké uniquement dans le navigateur local, jamais dans ce dépôt.
+- **Real-time dictation** — text appears as you speak (interim results shown in italics below the notepad).
+- **Voice punctuation** — say "comma", "period", "new line", "new paragraph", "question mark", "colon"... and SpeakWritter inserts the right symbol, with correct casing and spacing.
+- **Auto-start listening** — listening starts on its own when the app opens (toggle in settings).
+- **9 full themes** — every theme restyles the whole interface (not just the background): Light, Dark, Dark Wood, Light Wood, Sakura, Matte, Swiss, Sepia, Blue.
+- **Native window** — launched in `--app` mode (Chrome, Edge, Brave, Vivaldi or Opera), no address bar or tabs, like a real desktop app.
+- **Auto-save** — text is kept between sessions (browser local storage).
+- **Export** — copy to clipboard or save as `.txt` in one click.
+- **Built-in tech dictionary** — automatically fixes the casing of common tech terms dictated in French/English mix (e.g. "github" → "GitHub", "javascript" → "JavaScript"). Toggle in settings.
+- **Personal dictionary** — teach SpeakWritter your own corrections on top (e.g. "pouche" → "push"). Stored only in your local browser, never in this repository.
 
 ## Installation
 
-Prérequis : Windows, Python (déjà installé sur la plupart des machines ; sert uniquement à faire tourner le petit serveur local), et un navigateur basé sur Chromium (Chrome, Edge, Brave, Vivaldi, Opera).
+Requirements: Windows, Python (already installed on most machines; only used to run the small local server), and a Chromium-based browser (Chrome, Edge, Brave, Vivaldi, Opera).
 
-1. Cloner ou télécharger ce dépôt.
-2. Double-cliquer sur `Lancer SpeakWritter.bat`.
+1. Clone or download this repository.
+2. Double-click `Lancer SpeakWritter.bat`.
 
-Le lanceur démarre un petit serveur local (`http://127.0.0.1:8743`) puis ouvre l'app dans une fenêtre native. Voir [Autorisation du micro](#autorisation-du-micro) pour pourquoi ce serveur existe.
+The launcher starts a small local server (`http://127.0.0.1:8743`) then opens the app in a native window. See [Microphone permission](#microphone-permission) for why this server exists.
 
-Pour un raccourci sur le bureau avec l'icône de l'application :
+For a desktop shortcut with the app icon:
 
 ```powershell
 ./scripts/create-shortcut.ps1
 ```
 
-## Utilisation
+## Usage
 
-| Action | Comment |
+| Action | How |
 |---|---|
-| Démarrer / arrêter l'écoute | Cliquer sur le bouton micro (ou appuyer sur **Espace**) |
-| Changer de thème | Menu ⚙️ (réglages) → Thème |
-| Activer/désactiver la ponctuation vocale | Menu ⚙️ → Ponctuation vocale |
-| Copier le texte | Icône presse-papiers |
-| Enregistrer en `.txt` | Icône disquette |
-| Effacer | Icône corbeille |
+| Start / stop listening | Click the mic button (or press **Space**) |
+| Change theme | ⚙️ (settings) menu → Theme |
+| Toggle voice punctuation | ⚙️ menu → Voice punctuation |
+| Copy the text | Clipboard icon |
+| Save as `.txt` | Floppy disk icon |
+| Clear | Trash icon |
 
-### Commandes de ponctuation vocale
+### Voice punctuation commands
 
-`virgule` · `point` · `point d'interrogation` · `point d'exclamation` · `deux points` · `point virgule` · `points de suspension` · `à la ligne` · `nouveau paragraphe` · `ouvrez/fermez parenthèse` · `guillemets ouvrants/fermants` · `tiret`
+`virgule` (comma) · `point` (period) · `point d'interrogation` (question mark) · `point d'exclamation` (exclamation mark) · `deux points` (colon) · `point virgule` (semicolon) · `points de suspension` (ellipsis) · `à la ligne` (new line) · `nouveau paragraphe` (new paragraph) · `ouvrez/fermez parenthèse` (open/close parenthesis) · `guillemets ouvrants/fermants` (open/close quotes) · `tiret` (dash)
 
-## Dictionnaire technique intégré
+*(Commands are spoken in French, matching the app's French dictation language.)*
 
-Une liste de termes techniques courants (Git, GitHub, JavaScript, Docker, API, HTML...) livrée avec l'app et appliquée automatiquement pour corriger leur casse quand la reconnaissance vocale les retranscrit tout en minuscules. Désactivable via ⚙️ → "Corrections techniques auto". Cette liste fait partie du code de l'app et est partagée dans ce dépôt (contrairement au dictionnaire personnel ci-dessous).
+## Built-in tech dictionary
 
-## Dictionnaire personnel
+A list of common tech terms (Git, GitHub, JavaScript, Docker, API, HTML...) shipped with the app and applied automatically to fix their casing when speech recognition transcribes them all lowercase. Toggle via ⚙️ → "Auto tech corrections". This list is part of the app's code and is shared in this repository (unlike the personal dictionary below).
 
-Dans le menu ⚙️ → Dictionnaire personnel, ajoutez des paires "mot entendu → mot corrigé". À chaque dictée, SpeakWritter remplace automatiquement ces mots avant de les écrire (après le dictionnaire technique intégré, donc vos corrections personnelles ont toujours le dernier mot). Utile pour vos propres mélanges français/anglais récurrents (ex: `pouche` → `push`, `reposte` → `repository`).
+## Personal dictionary
 
-Ces corrections sont **100% locales** : stockées dans le `localStorage` de votre navigateur, elles ne quittent jamais votre machine et ne font partie d'aucun fichier de ce dépôt.
+In the ⚙️ menu → Personal dictionary, add "heard word → corrected word" pairs. On every dictation, SpeakWritter automatically replaces these words before writing them (after the built-in tech dictionary, so your personal corrections always have the final say). Useful for your own recurring French/English mix-ups (e.g. `pouche` → `push`, `reposte` → `repository`).
 
-## Autorisation du micro
+These corrections are **100% local**: stored in your browser's `localStorage`, they never leave your machine and are never part of any file in this repository.
 
-La première fois, votre navigateur demande l'autorisation d'accès au micro — c'est normal. Elle ne redemande plus ensuite : l'app tourne sur `http://127.0.0.1:8743` (un vrai serveur local, pas un fichier ouvert directement), et les navigateurs basés sur Chromium retiennent fiablement les autorisations données sur ce type d'origine — contrairement aux pages ouvertes en `file://`, où l'autorisation pouvait ne pas être mémorisée d'une session à l'autre.
+## Microphone permission
 
-## Structure du projet
+The first time, your browser asks for microphone access — that's normal. It won't ask again after that: the app runs on `http://127.0.0.1:8743` (a real local server, not a directly opened file), and Chromium-based browsers reliably remember permissions granted on that kind of origin — unlike pages opened as `file://`, where the permission could fail to persist across sessions.
+
+## Project structure
 
 ```
 speakwrite/
-├── speakwrite.html          # L'application (HTML/CSS/JS, un seul fichier)
-├── Lancer SpeakWritter.bat  # Lanceur Windows (démarre le serveur local + ouvre l'app en mode natif)
-├── logo.ico                 # Icône de l'application
+├── speakwrite.html          # The app (HTML/CSS/JS, a single file)
+├── Lancer SpeakWritter.bat  # Windows launcher (starts the local server + opens the app in native mode)
+├── logo.ico                 # App icon
 ├── scripts/
-│   ├── serve.py              # Petit serveur HTTP local (127.0.0.1)
-│   ├── generate-logo.ps1     # Régénère logo.ico
-│   └── create-shortcut.ps1   # Crée le raccourci sur le bureau
+│   ├── serve.py              # Small local HTTP server (127.0.0.1)
+│   ├── generate-logo.ps1     # Regenerates logo.ico
+│   └── create-shortcut.ps1   # Creates the desktop shortcut
 └── README.md
 ```
 
-## Technique
+## Technical details
 
-- Reconnaissance vocale : [Web Speech API](https://developer.mozilla.org/fr/docs/Web/API/Web_Speech_API) (moteur du navigateur).
-- Serveur local minimal en Python (`http.server` de la bibliothèque standard, zéro dépendance) pour servir l'app sur `http://127.0.0.1:8743` plutôt qu'en `file://`.
-- Aucun build, aucune dépendance JS : un fichier HTML autonome.
-- Icône générée via `System.Drawing` (.NET) en PowerShell.
+- Speech recognition: [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API) (browser engine).
+- Minimal local server in Python (standard library's `http.server`, zero dependencies) to serve the app on `http://127.0.0.1:8743` instead of `file://`.
+- No build step, no JS dependencies: a self-contained HTML file.
+- Icon generated via `System.Drawing` (.NET) in PowerShell.
 
-## Licence
+## License
 
-Ce projet est sous licence [MIT](LICENSE).
+This project is licensed under [MIT](LICENSE).
