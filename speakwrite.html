@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>SpeakWritter</title>
+<style>
+  /* Light theme is the default palette defined on :root.
+     Every other theme below only overrides these custom properties,
+     so the whole interface (not just the notepad) reacts to theme changes. */
+  :root{
+    --bg:#f3efe6;
+    --panel:#ffffff;
+    --paper:#fbfaf6;
+    --ink:#2b2b2b;
+    --accent:#ff5a4e;
+    --accent2:#3ecf8e;
+    --muted:#8a8478;
+    --border:#e3ddd0;
+    --header-text:#2b2b2b;
+    --btn-bg:#ffffff;
+    --btn-bg-hover:#f1ece0;
+    --icon-color:#5c574c;
+    --icon-hover:#2b2b2b;
+    --settings-bg:#ffffff;
+    --status-strong:#2b2b2b;
+    --interim-color:#b8ae9c;
+    --interim-border:#e4dfd2;
+    --placeholder-color:#b8b0a0;
+    --editor-font:Georgia,"Cambria",serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    font-family:"Segoe UI",system-ui,sans-serif;
+    background:var(--bg);
+    display:flex;
+    flex-direction:column;
+    height:100vh;
+    overflow:hidden;
+    -webkit-user-select:none;
+    user-select:none;
+  }
+  header{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 16px;
+    background:var(--panel);
+    border-bottom:1px solid var(--border);
+    -webkit-app-region:drag;
+  }
+  header h1{
+    font-size:15px;
+    color:var(--header-text);
+    margin:0;
+    font-weight:600;
+    letter-spacing:.3px;
+    flex-shrink:0;
+  }
+  header h1 span{color:var(--accent2);}
+  .toolbar{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-left:auto;
+    -webkit-app-region:no-drag;
+  }
+  select, .btn{
+    -webkit-app-region:no-drag;
+  }
+  select{
+    background:var(--btn-bg);
+    color:var(--header-text);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:6px 8px;
+    font-size:12px;
+    cursor:pointer;
+  }
+  label.chk{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    font-size:12px;
+    color:var(--muted);
+    cursor:pointer;
+  }
+  .btn{
+    background:var(--btn-bg);
+    color:var(--header-text);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:6px 10px;
+    font-size:12px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .btn:hover{background:var(--btn-bg-hover);}
+  .btn:active{transform:translateY(1px);}
+  .icon-btn{
+    width:32px;height:32px;
+    padding:0;
+    border-radius:50%;
+    justify-content:center;
+  }
+  .icon-btn svg{width:16px;height:16px;fill:var(--icon-color);}
+  .icon-btn:hover svg{fill:var(--icon-hover);}
+  .toolbar-divider{
+    width:1px;
+    height:20px;
+    background:var(--border);
+    margin:0 2px;
+  }
+  .settings-wrap{position:relative;}
+  .settings-panel{
+    position:absolute;
+    top:calc(100% + 10px);
+    right:0;
+    background:var(--settings-bg);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:14px;
+    display:none;
+    flex-direction:column;
+    gap:12px;
+    min-width:210px;
+    box-shadow:0 12px 32px rgba(0,0,0,.35);
+    z-index:20;
+  }
+  .settings-panel.open{display:flex;}
+  .settings-panel label.chk{color:var(--header-text);font-size:13px;}
+  .settings-label{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    font-size:12px;
+    color:var(--muted);
+  }
+  .settings-label select{width:100%;}
+
+  main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    padding:18px;
+    gap:10px;
+    min-height:0;
+  }
+  .paper-wrap{
+    flex:1;
+    background:var(--paper);
+    border-radius:10px;
+    box-shadow:0 6px 24px rgba(0,0,0,.25);
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+    overflow:hidden;
+  }
+  #editor{
+    flex:1;
+    resize:none;
+    border:none;
+    outline:none;
+    background:transparent;
+    color:var(--ink);
+    font-family:var(--editor-font);
+    font-size:18px;
+    line-height:1.65;
+    padding:22px 26px;
+    -webkit-user-select:text;
+    user-select:text;
+  }
+  .interim-bar{
+    padding:6px 26px 12px;
+    font-size:14px;
+    font-style:italic;
+    color:var(--interim-color);
+    min-height:18px;
+    border-top:1px dashed var(--interim-border);
+  }
+
+  footer{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:18px;
+    padding:14px;
+    background:var(--panel);
+    border-top:1px solid var(--border);
+  }
+  #micBtn{
+    width:64px;height:64px;
+    border-radius:50%;
+    border:none;
+    background:var(--accent2);
+    color:#0c1c14;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 4px 14px rgba(62,207,142,.35);
+    transition:background .15s, box-shadow .15s, transform .1s;
+  }
+  #micBtn svg{width:26px;height:26px;fill:#0c1c14;}
+  #micBtn:active{transform:scale(.95);}
+  #micBtn.listening{
+    background:var(--accent);
+    box-shadow:0 0 0 8px rgba(255,90,78,.18);
+    animation:pulse 1.3s infinite;
+  }
+  #micBtn.listening svg{fill:#fff;}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(255,90,78,.45);}
+    70%{box-shadow:0 0 0 16px rgba(255,90,78,0);}
+    100%{box-shadow:0 0 0 0 rgba(255,90,78,0);}
+  }
+  #status{
+    color:var(--muted);
+    font-size:13px;
+    min-width:160px;
+  }
+  #status b{color:var(--status-strong);}
+
+  #editor::placeholder{
+    color:var(--placeholder-color);
+  }
+
+  /* --- Theme palettes: each one restyles the whole app, not just the paper --- */
+  html[data-theme="dark"]{
+    --bg:#0d0d0f;
+    --panel:#16171c;
+    --paper:#000000;
+    --ink:#ffffff;
+    --border:#2a2b31;
+    --muted:#8a8d98;
+    --header-text:#ffffff;
+    --btn-bg:#1e1f24;
+    --btn-bg-hover:#2a2b32;
+    --icon-color:#c7c8d1;
+    --icon-hover:#ffffff;
+    --settings-bg:#1c1d23;
+    --status-strong:#ffffff;
+    --interim-color:#8f8f8f;
+    --interim-border:#242424;
+    --placeholder-color:#555555;
+  }
+  html[data-theme="bois"]{
+    --bg:#241811;
+    --panel:#33241a;
+    --paper:#3e2b1f;
+    --ink:#f3e2c4;
+    --border:#5a4230;
+    --muted:#b08d63;
+    --header-text:#f3e2c4;
+    --btn-bg:#3e2b1f;
+    --btn-bg-hover:#4a3626;
+    --icon-color:#d9bd93;
+    --icon-hover:#f3e2c4;
+    --settings-bg:#33241a;
+    --status-strong:#f3e2c4;
+    --interim-color:#c8a97e;
+    --interim-border:#5a4230;
+    --placeholder-color:#8a6b4c;
+  }
+  html[data-theme="sakura"]{
+    --bg:#fff5f7;
+    --panel:#ffe4ea;
+    --paper:#fff0f4;
+    --ink:#5b2333;
+    --border:#f3cddb;
+    --muted:#b06a80;
+    --header-text:#5b2333;
+    --btn-bg:#ffe9ee;
+    --btn-bg-hover:#ffd3de;
+    --icon-color:#a44863;
+    --icon-hover:#5b2333;
+    --settings-bg:#ffe9ee;
+    --status-strong:#5b2333;
+    --interim-color:#c98a9c;
+    --interim-border:#f3cddb;
+    --placeholder-color:#d9a6b8;
+  }
+  html[data-theme="matte"]{
+    --bg:#242529;
+    --panel:#2e2f33;
+    --paper:#2e2f33;
+    --ink:#ececed;
+    --border:#3d3e43;
+    --muted:#8d8e93;
+    --header-text:#ececed;
+    --btn-bg:#35363b;
+    --btn-bg-hover:#3d3e44;
+    --icon-color:#c3c4c9;
+    --icon-hover:#ffffff;
+    --settings-bg:#2e2f33;
+    --status-strong:#ececed;
+    --interim-color:#8d8e93;
+    --interim-border:#3d3e43;
+    --placeholder-color:#5a5b60;
+  }
+  html[data-theme="suisse"]{
+    --bg:#ffffff;
+    --panel:#ffffff;
+    --paper:#ffffff;
+    --ink:#111111;
+    --border:#111111;
+    --muted:#555555;
+    --header-text:#111111;
+    --btn-bg:#ffffff;
+    --btn-bg-hover:#f0f0f0;
+    --icon-color:#111111;
+    --icon-hover:#d52b1e;
+    --settings-bg:#ffffff;
+    --status-strong:#111111;
+    --interim-color:#d52b1e;
+    --interim-border:#111111;
+    --placeholder-color:#9a9a9a;
+    --editor-font:"Helvetica Neue",Arial,sans-serif;
+  }
+
+  #unsupported{
+    display:none;
+    position:fixed;inset:0;
+    background:rgba(0,0,0,.85);
+    color:#fff;
+    align-items:center;justify-content:center;
+    text-align:center;
+    padding:40px;
+    font-size:14px;
+    line-height:1.6;
+    z-index:10;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Speak<span>Writter</span></h1>
+  <div class="toolbar">
+    <div class="settings-wrap">
+      <button class="btn icon-btn" id="settingsBtn" title="Réglages">
+        <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7.3 7.3 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.61.22L3.64 8.84a.5.5 0 0 0 .12.64L5.79 11a7.3 7.3 0 0 0 0 1.88l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.14.24.42.32.61.22l2.39-.96c.49.38 1.03.7 1.62.94l.36 2.54c.05.24.26.42.5.42h3.84c.24 0 .45-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.24.1.47.02.61-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg>
+      </button>
+      <div class="settings-panel" id="settingsPanel">
+        <label class="chk"><input type="checkbox" id="autostartToggle" checked> Écoute automatique</label>
+        <label class="chk"><input type="checkbox" id="punctToggle" checked> Ponctuation vocale</label>
+        <label class="settings-label">Langue
+          <select id="lang">
+            <option value="fr-FR" selected>Français</option>
+            <option value="en-US">English</option>
+          </select>
+        </label>
+        <label class="settings-label">Thème
+          <select id="themeSelect">
+            <option value="light">Clair</option>
+            <option value="dark">Sombre</option>
+            <option value="bois">Bois</option>
+            <option value="sakura">Sakura</option>
+            <option value="matte">Matte</option>
+            <option value="suisse">Suisse</option>
+          </select>
+        </label>
+      </div>
+    </div>
+    <span class="toolbar-divider"></span>
+    <button class="btn icon-btn" id="copyBtn" title="Copier">
+      <svg viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+    </button>
+    <button class="btn icon-btn" id="saveBtn" title="Enregistrer en .txt">
+      <svg viewBox="0 0 24 24"><path d="M12 3v10.17l3.59-3.58L17 11l-5 5-5-5 1.41-1.41L11 13.17V3h1zM5 19h14v2H5z"/></svg>
+    </button>
+    <button class="btn icon-btn" id="clearBtn" title="Effacer">
+      <svg viewBox="0 0 24 24"><path d="M9 3h6l1 2h4v2H4V5h4l1-2zm-2 6h2v9H7V9zm4 0h2v9h-2V9zm4 0h2v9h-2V9zM6 7h12l-1 14H7L6 7z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+  <div class="paper-wrap">
+    <textarea id="editor" placeholder="Cliquez sur le micro et parlez... Le texte apparaît ici en temps réel."></textarea>
+    <div class="interim-bar" id="interim"></div>
+  </div>
+</main>
+
+<footer>
+  <div id="status">Micro coupé</div>
+  <button id="micBtn" title="Démarrer / arrêter la dictée">
+    <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>
+  </button>
+  <div style="width:160px"></div>
+</footer>
+
+<div id="unsupported">
+  Votre navigateur ne supporte pas la reconnaissance vocale (Web Speech API).<br><br>
+  Ouvrez cette page avec <b>Google Chrome</b> ou <b>Microsoft Edge</b> pour utiliser SpeakWritter.
+</div>
+
+<script>
+(function(){
+  const editor = document.getElementById('editor');
+  const interimBar = document.getElementById('interim');
+  const micBtn = document.getElementById('micBtn');
+  const status = document.getElementById('status');
+  const langSel = document.getElementById('lang');
+  const punctToggle = document.getElementById('punctToggle');
+  const copyBtn = document.getElementById('copyBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const autostartToggle = document.getElementById('autostartToggle');
+  const settingsBtn = document.getElementById('settingsBtn');
+  const settingsPanel = document.getElementById('settingsPanel');
+  const themeSelect = document.getElementById('themeSelect');
+
+  // --- Restore saved text between sessions ---
+  const STORAGE_KEY = 'speakwrite_text';
+  editor.value = localStorage.getItem(STORAGE_KEY) || '';
+  editor.addEventListener('input', () => localStorage.setItem(STORAGE_KEY, editor.value));
+
+  // --- Themes ---
+  const THEME_KEY = 'speakwrite_theme';
+  function applyTheme(theme){
+    document.documentElement.setAttribute('data-theme', theme);
+  }
+  let currentTheme = localStorage.getItem(THEME_KEY) || 'light';
+  themeSelect.value = currentTheme;
+  applyTheme(currentTheme);
+  themeSelect.addEventListener('change', () => {
+    currentTheme = themeSelect.value;
+    localStorage.setItem(THEME_KEY, currentTheme);
+    applyTheme(currentTheme);
+  });
+
+  // --- Settings dropdown menu ---
+  settingsBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    settingsPanel.classList.toggle('open');
+  });
+  document.addEventListener('click', (e) => {
+    if(settingsPanel.classList.contains('open') && !settingsPanel.contains(e.target) && e.target !== settingsBtn){
+      settingsPanel.classList.remove('open');
+    }
+  });
+
+  // --- Auto-start listening on launch ---
+  const AUTOSTART_KEY = 'speakwrite_autostart';
+  autostartToggle.checked = localStorage.getItem(AUTOSTART_KEY) !== 'false';
+  autostartToggle.addEventListener('change', () => {
+    localStorage.setItem(AUTOSTART_KEY, autostartToggle.checked ? 'true' : 'false');
+  });
+
+  // --- Browser support check ---
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition){
+    document.getElementById('unsupported').style.display = 'flex';
+    return;
+  }
+
+  // --- Voice punctuation commands (French) ---
+  const commands = [
+    { words:["points","de","suspension"], symbol:"…" },
+    { words:["point","d","interrogation"], symbol:"?" },
+    { words:["point","d","exclamation"], symbol:"!" },
+    { words:["nouveau","paragraphe"], symbol:"\n\n" },
+    { words:["a","la","ligne"], symbol:"\n" },
+    { words:["nouvelle","ligne"], symbol:"\n" },
+    { words:["retour","a","la","ligne"], symbol:"\n" },
+    { words:["ouvrez","la","parenthese"], symbol:"(" },
+    { words:["ouvrez","parenthese"], symbol:"(" },
+    { words:["ouvrir","parenthese"], symbol:"(" },
+    { words:["fermez","la","parenthese"], symbol:")" },
+    { words:["fermez","parenthese"], symbol:")" },
+    { words:["fermer","parenthese"], symbol:")" },
+    { words:["deux","points"], symbol:":" },
+    { words:["point","virgule"], symbol:";" },
+    { words:["guillemets","ouvrants"], symbol:"«" },
+    { words:["guillemets","fermants"], symbol:"»" },
+    { words:["virgule"], symbol:"," },
+    { words:["point"], symbol:"." },
+    { words:["tiret"], symbol:"-" },
+  ].sort((a,b) => b.words.length - a.words.length);
+
+  function normalizeWord(w){
+    return w.toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g,'') // strip accents so "a" matches "à"
+      .replace(/['’]/g,'')
+      .replace(/[.,!?;:]/g,'');
+  }
+
+  const NO_SPACE_BEFORE = new Set([',','.','!','?',';',':','…',')','»']);
+  const NO_SPACE_AFTER = new Set(['(','«','\n','\n\n']);
+
+  let capitalizeNext = true;
+
+  function processTranscript(rawTranscript, punctuationOn){
+    const words = rawTranscript.trim().split(/\s+/).filter(Boolean);
+    if(words.length === 0) return '';
+
+    if(!punctuationOn){
+      let text = words.join(' ');
+      if(capitalizeNext) text = text.charAt(0).toUpperCase() + text.slice(1);
+      capitalizeNext = /[.!?]$/.test(text.trim());
+      return text + ' ';
+    }
+
+    const tokens = [];
+    let i = 0;
+    while(i < words.length){
+      let matched = false;
+      for(const cmd of commands){
+        const len = cmd.words.length;
+        if(i + len > words.length) continue;
+        let ok = true;
+        for(let k=0;k<len;k++){
+          if(normalizeWord(words[i+k]) !== cmd.words[k]){ ok = false; break; }
+        }
+        if(ok){
+          tokens.push({ type:'sym', value: cmd.symbol });
+          i += len;
+          matched = true;
+          break;
+        }
+      }
+      if(!matched){
+        tokens.push({ type:'word', value: words[i] });
+        i += 1;
+      }
+    }
+
+    let out = '';
+    let prevNoSpaceAfter = true; // nothing precedes the very first word
+    for(const tok of tokens){
+      const val = tok.value;
+      const needSpaceBefore = !(prevNoSpaceAfter || NO_SPACE_BEFORE.has(val));
+      if(needSpaceBefore) out += ' ';
+
+      let piece = val;
+      if(tok.type === 'word' && capitalizeNext){
+        piece = piece.charAt(0).toUpperCase() + piece.slice(1);
+        capitalizeNext = false;
+      }
+      out += piece;
+
+      if(tok.type === 'sym' && /[.!?…]/.test(val)){
+        capitalizeNext = true;
+      }
+      prevNoSpaceAfter = NO_SPACE_AFTER.has(val) || val === '\n' || val === '\n\n';
+    }
+    return out + ' ';
+  }
+
+  // --- Speech recognition ---
+  let recognition = null;
+  let listening = false;
+  let userStopped = true;
+
+  function createRecognition(){
+    const r = new SpeechRecognition();
+    r.continuous = true;
+    r.interimResults = true;
+    r.maxAlternatives = 1;
+    r.lang = langSel.value;
+
+    r.onresult = (event) => {
+      let interim = '';
+      for(let i = event.resultIndex; i < event.results.length; i++){
+        const res = event.results[i];
+        if(res.isFinal){
+          const finalText = processTranscript(res[0].transcript, punctToggle.checked);
+          editor.value += finalText;
+          editor.scrollTop = editor.scrollHeight;
+          localStorage.setItem(STORAGE_KEY, editor.value);
+        } else {
+          interim += res[0].transcript;
+        }
+      }
+      interimBar.textContent = interim;
+    };
+
+    r.onerror = (e) => {
+      if(e.error === 'no-speech' || e.error === 'audio-capture'){
+        return; // will be restarted by onend
+      }
+      if(e.error === 'not-allowed' || e.error === 'service-not-allowed'){
+        status.innerHTML = '<b>Micro refusé</b> — autorisez l\'accès au micro';
+        userStopped = true;
+        listening = false;
+        micBtn.classList.remove('listening');
+      }
+    };
+
+    r.onend = () => {
+      if(listening && !userStopped){
+        // Chrome periodically ends the session in continuous mode -> restart it
+        try{ recognition.start(); }catch(err){}
+      } else {
+        listening = false;
+        micBtn.classList.remove('listening');
+        status.textContent = 'Micro coupé';
+        interimBar.textContent = '';
+      }
+    };
+
+    return r;
+  }
+
+  function startListening(){
+    recognition = createRecognition();
+    userStopped = false;
+    listening = true;
+    try{
+      recognition.start();
+      micBtn.classList.add('listening');
+      status.innerHTML = '<b>Écoute en cours…</b>';
+    }catch(err){
+      listening = false;
+    }
+  }
+
+  function stopListening(){
+    userStopped = true;
+    listening = false;
+    if(recognition) recognition.stop();
+    micBtn.classList.remove('listening');
+    status.textContent = 'Micro coupé';
+    interimBar.textContent = '';
+  }
+
+  micBtn.addEventListener('click', () => {
+    if(listening) stopListening(); else startListening();
+  });
+
+  langSel.addEventListener('change', () => {
+    if(listening){ stopListening(); startListening(); }
+  });
+
+  const COPY_ICON = copyBtn.innerHTML;
+  const CHECK_ICON = '<svg viewBox="0 0 24 24"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+  copyBtn.addEventListener('click', async () => {
+    await navigator.clipboard.writeText(editor.value);
+    copyBtn.innerHTML = CHECK_ICON;
+    copyBtn.title = 'Copié !';
+    setTimeout(() => {
+      copyBtn.innerHTML = COPY_ICON;
+      copyBtn.title = 'Copier';
+    }, 1200);
+  });
+
+  saveBtn.addEventListener('click', () => {
+    const blob = new Blob([editor.value], { type:'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+    a.href = url;
+    a.download = `speakwrite-${stamp}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  clearBtn.addEventListener('click', () => {
+    if(editor.value.trim() && !confirm('Effacer tout le texte ?')) return;
+    editor.value = '';
+    localStorage.setItem(STORAGE_KEY, '');
+    capitalizeNext = true;
+  });
+
+  // Keyboard shortcut: spacebar toggles the mic (when the editor isn't focused)
+  document.addEventListener('keydown', (e) => {
+    if(e.code === 'Space' && document.activeElement !== editor){
+      e.preventDefault();
+      micBtn.click();
+    }
+  });
+
+  // Auto-start listening on launch (once the mic permission is granted the
+  // first time, it won't be asked again)
+  if(autostartToggle.checked){
+    startListening();
+  }
+})();
+</script>
+</body>
+</html>
