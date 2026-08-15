@@ -4,6 +4,13 @@ set "ROOT=%~dp0"
 set "PORT=8743"
 set "URL=http://127.0.0.1:%PORT%/speakwrite.html"
 
+rem If SpeakWritter is already open, focus that window instead of opening a
+rem second one (multiple windows fight over the microphone and break dictation)
+powershell -NoProfile -ExecutionPolicy Bypass -File "%ROOT%scripts\focus-existing-window.ps1" >nul 2>&1
+if not errorlevel 1 (
+  goto :eof
+)
+
 rem Start the local server only if it isn't already running (previous launch)
 powershell -NoProfile -Command "try{(New-Object Net.Sockets.TcpClient).Connect('127.0.0.1',%PORT%);exit 0}catch{exit 1}" >nul 2>&1
 if errorlevel 1 (
