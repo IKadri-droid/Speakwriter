@@ -26,9 +26,14 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
         pass  # keep the background process silent
 
 
-class ReusableServer(socketserver.TCPServer):
+class ReusableThreadingServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    # A plain TCPServer handles one connection at a time; a lingering
+    # keep-alive connection from the browser can then block every other
+    # request (including page reloads) until it's closed. ThreadingMixIn
+    # spins up a thread per connection so the server stays responsive.
     allow_reuse_address = True
+    daemon_threads = True
 
 
-with ReusableServer(("127.0.0.1", PORT), QuietHandler) as httpd:
+with ReusableThreadingServer(("127.0.0.1", PORT), QuietHandler) as httpd:
     httpd.serve_forever()
