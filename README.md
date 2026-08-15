@@ -15,7 +15,7 @@ SpeakWritter fonctionne sur **tout navigateur basé sur Chromium** : Google Chro
 - **Dictée en temps réel** — le texte apparaît au fur et à mesure que vous parlez (résultats intermédiaires affichés en italique sous le bloc-notes).
 - **Ponctuation vocale** — dites "virgule", "point", "à la ligne", "nouveau paragraphe", "point d'interrogation", "deux points", "ouvrez parenthèse"... et SpeakWritter insère le bon symbole, avec la bonne casse et le bon espacement.
 - **Démarrage automatique** — l'écoute démarre toute seule à l'ouverture de l'application (activable/désactivable dans les réglages).
-- **6 thèmes complets** — chaque thème change toute l'interface (pas seulement le fond) : Clair, Sombre, Bois, Sakura, Matte, Suisse.
+- **9 thèmes complets** — chaque thème change toute l'interface (pas seulement le fond) : Clair, Sombre, Bois foncé, Bois clair, Sakura, Matte, Suisse, Jauni, Bleu.
 - **Fenêtre native** — lancée en mode `--app` (Chrome, Edge, Brave, Vivaldi ou Opera), sans barre d'adresse ni onglets, comme une vraie application de bureau.
 - **Sauvegarde automatique** — le texte est conservé entre les sessions (stockage local du navigateur).
 - **Export** — copier dans le presse-papiers ou enregistrer en `.txt` en un clic.
