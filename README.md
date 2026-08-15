@@ -74,4 +74,4 @@ speakwrite/
 
 ## Licence
 
-Projet personnel, libre d'utilisation.
+Ce projet est sous licence [MIT](LICENSE).
