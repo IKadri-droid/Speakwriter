@@ -14,6 +14,7 @@ SpeakWritter works on **any Chromium-based browser**: Google Chrome, Microsoft E
 
 - **Real-time dictation** — text appears as you speak (interim results shown in italics below the notepad).
 - **Voice punctuation** — say "comma", "period", "new line", "new paragraph", "question mark", "colon"... and SpeakWritter inserts the right symbol, with correct casing and spacing.
+- **Voice editing commands** — say "efface le dernier mot", "annule" or "sélectionne tout" to edit without touching the keyboard.
 - **Auto-start listening** — listening starts on its own when the app opens (toggle in settings).
 - **9 full themes** — every theme restyles the whole interface (not just the background): Light, Dark, Dark Wood, Light Wood, Sakura, Matte, Swiss, Sepia, Blue.
 - **Native window** — launched in `--app` mode (Chrome, Edge, Brave, Vivaldi or Opera), no address bar or tabs, like a real desktop app.
@@ -53,6 +54,16 @@ For a desktop shortcut with the app icon:
 `virgule` (comma) · `point` (period) · `point d'interrogation` (question mark) · `point d'exclamation` (exclamation mark) · `deux points` (colon) · `point virgule` (semicolon) · `points de suspension` (ellipsis) · `à la ligne` (new line) · `nouveau paragraphe` (new paragraph) · `ouvrez/fermez parenthèse` (open/close parenthesis) · `guillemets ouvrants/fermants` (open/close quotes) · `tiret` (dash)
 
 *(Commands are spoken in French, matching the app's French dictation language.)*
+
+### Voice editing commands
+
+| Say | Effect |
+|---|---|
+| `efface le dernier mot` / `supprime le dernier mot` | Deletes the last word |
+| `annule` / `annule la dernière phrase` / `efface la dernière phrase` | Undoes the last voice-inserted chunk of text |
+| `sélectionne tout` | Selects all the text in the notepad |
+
+These only trigger when the whole spoken chunk matches one of the phrases above, so they don't misfire in the middle of normal dictation.
 
 ## Built-in tech dictionary
 
