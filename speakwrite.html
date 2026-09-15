@@ -27,6 +27,9 @@
     --interim-border:#e4dfd2;
     --placeholder-color:#b8b0a0;
     --editor-font:Georgia,"Cambria",serif;
+    --accent-glow:rgba(255,90,78,.45);
+    --accent-glow-soft:rgba(255,90,78,.18);
+    --accent2-glow:rgba(62,207,142,.35);
   }
   *{box-sizing:border-box;}
   html,body{height:100%;margin:0;}
@@ -267,21 +270,21 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    box-shadow:0 4px 14px rgba(62,207,142,.35);
+    box-shadow:0 4px 14px var(--accent2-glow);
     transition:background .15s, box-shadow .15s, transform .1s;
   }
   #micBtn svg{width:26px;height:26px;fill:#0c1c14;}
   #micBtn:active{transform:scale(.95);}
   #micBtn.listening{
     background:var(--accent);
-    box-shadow:0 0 0 8px rgba(255,90,78,.18);
+    box-shadow:0 0 0 8px var(--accent-glow-soft);
     animation:pulse 1.3s infinite;
   }
   #micBtn.listening svg{fill:#fff;}
   @keyframes pulse{
-    0%{box-shadow:0 0 0 0 rgba(255,90,78,.45);}
-    70%{box-shadow:0 0 0 16px rgba(255,90,78,0);}
-    100%{box-shadow:0 0 0 0 rgba(255,90,78,0);}
+    0%{box-shadow:0 0 0 0 var(--accent-glow);}
+    70%{box-shadow:0 0 0 16px transparent;}
+    100%{box-shadow:0 0 0 0 transparent;}
   }
   #status{
     color:var(--muted);
@@ -440,6 +443,32 @@
     --interim-border:#d7e1ea;
     --placeholder-color:#b0c0cd;
   }
+  /* Mosaïque: same black/white/red pixel-mosaic identity as the project logo */
+  html[data-theme="mosaique"]{
+    --bg:#000000;
+    --panel:#0c0c0c;
+    --paper:#000000;
+    --ink:#ffffff;
+    --accent:#b0141b;
+    --accent2:#ffffff;
+    --border:#2a2a2a;
+    --muted:#8f8f8f;
+    --header-text:#ffffff;
+    --btn-bg:#141414;
+    --btn-bg-hover:#1f1f1f;
+    --icon-color:#e5e5e5;
+    --icon-hover:#ffffff;
+    --settings-bg:#0c0c0c;
+    --status-strong:#ffffff;
+    --interim-color:#8f8f8f;
+    --interim-border:#2a2a2a;
+    --placeholder-color:#4d4d4d;
+    --editor-font:"SFMono-Regular","Consolas","Liberation Mono",monospace;
+    --accent-glow:rgba(176,20,27,.45);
+    --accent-glow-soft:rgba(176,20,27,.18);
+    --accent2-glow:rgba(255,255,255,.25);
+  }
+  html[data-theme="mosaique"] header h1 span{color:var(--accent);}
 
   #unsupported, #micBlocked{
     display:none;
@@ -504,6 +533,7 @@
             <option value="suisse">Suisse</option>
             <option value="jauni">Jauni</option>
             <option value="bleu">Bleu</option>
+            <option value="mosaique">Mosaïque</option>
           </select>
         </label>
         <div class="settings-label">

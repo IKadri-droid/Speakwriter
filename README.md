@@ -17,7 +17,7 @@ SpeakWritter is a single local web page. A small local server serves it on your 
 ## Features
 
 - 🎙️ **Real-time dictation**, with spoken punctuation ("comma", "new line"...) and a few voice editing commands (delete last word, undo, select all).
-- 🎨 **9 full themes** to restyle the whole app.
+- 🎨 **10 full themes** to restyle the whole app, including a black/white/red "Mosaïque" theme matching this project's logo.
 - 🖥️ **Native app window** — no address bar, no tabs.
 - 💾 **Auto-save and export** to `.txt` or clipboard.
 - 📖 **Smart corrections** — a built-in tech-terms dictionary plus your own personal dictionary, kept 100% local.
